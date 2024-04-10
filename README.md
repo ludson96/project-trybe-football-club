@@ -1,4 +1,4 @@
-# Repositório do projeto Trybe futebol clube
+# Repositório do projeto Trybe Futebol Clube ⚽
 
 ## Módulo: BACK-END
 
