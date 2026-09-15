@@ -2,10 +2,10 @@ import { Request, Response } from 'express';
 import UserService from '../services/UserService';
 
 export default class UserController {
-  constructor(private _userService = new UserService()) { }
+  constructor(public userService = new UserService()) { }
 
   public login = async (req: Request, res: Response): Promise<object> => {
-    const token = await this._userService.login(req.body);
+    const token = await this.userService.login(req.body);
     if (!token) {
       return res.status(401)
         .json({ message: 'Incorrect email or password' });
@@ -15,7 +15,7 @@ export default class UserController {
 
   public getRole = async (req: Request, res: Response) => {
     const { email } = req.body.user.data;
-    const { type } = await this._userService.getRole(email);
+    const { type } = await this.userService.getRole(email);
     if (!type) {
       return res.status(401).json({ message: 'email incorreto' });
     }

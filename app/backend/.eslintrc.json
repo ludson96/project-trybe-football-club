@@ -9,7 +9,6 @@
   "extends": [
     "plugin:@typescript-eslint/recommended",
     "airbnb-base",
-    "plugin:mocha/recommended",
     "airbnb-typescript/base"
   ],
   "parser": "@typescript-eslint/parser",
@@ -20,8 +19,7 @@
   },
   "plugins": [
     "@typescript-eslint",
-    "sonarjs",
-    "mocha"
+    "sonarjs"
   ],
   "rules": {
     "no-underscore-dangle": "off",
@@ -53,7 +51,7 @@
         "ignoreRestSiblings": true
       }
     ],
-    "@typescript-eslint/lines-between-class-members": ["error", "always", { "exceptAfterSingleLine": true }],
+    "@typescript-eslint/lines-between-class-members": "off",
     "no-unused-vars": [
       "error",
       {

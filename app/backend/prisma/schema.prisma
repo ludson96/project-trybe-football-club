@@ -1,0 +1,41 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Team {
+  id          Int      @id @default(autoincrement())
+  teamName    String   @map("team_name")
+  homeMatches Match[]  @relation("HomeTeamMatches")
+  awayMatches Match[]  @relation("AwayTeamMatches")
+
+  @@map("teams")
+}
+
+model Match {
+  id            Int      @id @default(autoincrement())
+  homeTeamId    Int      @map("home_team_id")
+  homeTeamGoals Int      @map("home_team_goals")
+  awayTeamId    Int      @map("away_team_id")
+  awayTeamGoals Int      @map("away_team_goals")
+  inProgress    Boolean  @default(false) @map("in_progress")
+
+  homeTeam      Team     @relation("HomeTeamMatches", fields: [homeTeamId], references: [id])
+  awayTeam      Team     @relation("AwayTeamMatches", fields: [awayTeamId], references: [id])
+
+  @@map("matches")
+}
+
+model User {
+  id       Int     @id @default(autoincrement())
+  username String
+  role     String
+  email    String  @unique
+  password String
+
+  @@map("users")
+}

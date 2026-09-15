@@ -11,4 +11,5 @@ router.post('/', validEmailPwd.emailPwd, userController.login);
 
 router.get('/validate', validateJwt.validateToken, userController.getRole);
 
+export { userController };
 export default router;

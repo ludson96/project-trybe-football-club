@@ -1,150 +1,111 @@
-import * as sinon from 'sinon';
-import * as chai from 'chai';
-// @ts-ignore
-import chaiHttp = require('chai-http');
-
-import { Response } from 'superagent';
+import { describe, it, expect, vi } from 'vitest';
+import request from 'supertest';
 import { app } from '../app';
-import UserModel from '../database/models/UserModel';
-import { token, validUser, validLogin, withoutEmail, withoutPwd, invalidEmail, invalidPwd } from './mocks/login.mock';
+import { userController } from '../routers/userRoutes';
+import { token, validLogin, withoutEmail, withoutPwd, invalidEmail, invalidPwd } from './mocks/login.mock';
 
-chai.use(chaiHttp);
-
-const { expect } = chai;
-
-describe('Teste User', function() {
-  describe('Teste para o login', function() {
-    let chaiHttpResponse: Response;
-
-    afterEach(sinon.restore);
-
+describe('Teste User (Vitest)', () => {
+  describe('POST /login - Realizar login', () => {
     it('Realizar login com sucesso', async () => {
-      sinon
-      .stub(UserModel, "findOne")
-      .resolves(validUser as UserModel);
+      vi.spyOn(userController.userService, 'login').mockResolvedValue(token as any);
 
-      chaiHttpResponse = await chai
-      .request(app).post('/login')
-      .send(validLogin);
+      const response = await request(app)
+        .post('/login')
+        .send(validLogin);
 
-      expect(chaiHttpResponse.status).to.be.equal(200);
-      expect(chaiHttpResponse.body).to.have.property('token')
-    }); 
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('token');
+
+      vi.restoreAllMocks();
+    });
 
     it('Não é possível realizar login sem email', async () => {
-      sinon
-      .stub(UserModel, "findOne")
-      .resolves(validUser as UserModel);
+      const response = await request(app)
+        .post('/login')
+        .send(withoutEmail);
 
-      chaiHttpResponse = await chai
-      .request(app).post('/login')
-      .send(withoutEmail);
-
-      expect(chaiHttpResponse.status).to.be.equal(400);
-      expect(chaiHttpResponse.body).to.deep.equal({ "message": "All fields must be filled" })
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({ message: 'All fields must be filled' });
     });
 
     it('Não é possível realizar login sem senha', async () => {
-      sinon
-      .stub(UserModel, "findOne")
-      .resolves(validUser as UserModel);
+      const response = await request(app)
+        .post('/login')
+        .send(withoutPwd);
 
-      chaiHttpResponse = await chai
-      .request(app)
-      .post('/login')
-      .send(withoutPwd);
-
-      expect(chaiHttpResponse.status).to.be.equal(400);
-      expect(chaiHttpResponse.body).to.deep.equal({ "message": "All fields must be filled" })
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({ message: 'All fields must be filled' });
     });
 
     it('Não é possível realizar login com um email incorreto', async () => {
-      sinon
-      .stub(UserModel, "findOne")
-      .resolves();
+      vi.spyOn(userController.userService, 'login').mockResolvedValue(undefined);
 
-      chaiHttpResponse = await chai
-      .request(app)
-      .post('/login')
-      .send(invalidEmail);
+      const response = await request(app)
+        .post('/login')
+        .send(invalidEmail);
 
-      expect(chaiHttpResponse.status).to.be.equal(401);
-      expect(chaiHttpResponse.body).to.deep.equal({ "message": "Incorrect email or password" })
-    }); 
+      expect(response.status).toBe(401);
+      expect(response.body).toEqual({ message: 'Incorrect email or password' });
+
+      vi.restoreAllMocks();
+    });
 
     it('Não é possível realizar login com a senha incorreto', async () => {
-      sinon
-      .stub(UserModel, "findOne")
-      .resolves(invalidPwd as UserModel);
+      vi.spyOn(userController.userService, 'login').mockResolvedValue(undefined);
 
-      chaiHttpResponse = await chai
-      .request(app)
-      .post('/login')
-      .send(invalidPwd);
+      const response = await request(app)
+        .post('/login')
+        .send(invalidPwd);
 
-      expect(chaiHttpResponse.status).to.be.equal(401);
-      expect(chaiHttpResponse.body).to.deep.equal({ "message": "Incorrect email or password" })
+      expect(response.status).toBe(401);
+      expect(response.body).toEqual({ message: 'Incorrect email or password' });
+
+      vi.restoreAllMocks();
     });
   });
 
-  describe('Teste para o getRole', function() {
-    let chaiHttpResponse: Response;
+  describe('GET /login/validate - Validar token', () => {
+    it('Retorna a role corretamente com token válido', async () => {
+      vi.spyOn(userController.userService, 'getRole').mockResolvedValue({ type: 'user' });
 
-    afterEach(sinon.restore);
+      const response = await request(app)
+        .get('/login/validate')
+        .set({ Authorization: token });
 
-    it('Retorna a role corretamente', async () => {
-      sinon
-      .stub(UserModel, "findOne")
-      .resolves(validUser as UserModel);
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({ role: 'user' });
 
-      chaiHttpResponse = await chai
-      .request(app)
-      .get('/login/validate')
-      .set({Authorization: token});
-
-      expect(chaiHttpResponse.status).to.be.equal(200);
-      expect(chaiHttpResponse.body).to.deep.equal({ "role": "user" })
-    });
-    
-    it('Email incorreto', async () => {
-      sinon
-      .stub(UserModel, "findOne")
-      .resolves();
-
-      chaiHttpResponse = await chai
-      .request(app)
-      .get('/login/validate')
-      .set({Authorization: token});
-
-      expect(chaiHttpResponse.status).to.be.equal(401);
-      expect(chaiHttpResponse.body).to.deep.equal({ message: 'email incorreto' })
+      vi.restoreAllMocks();
     });
 
-    it('Token invalido', async () => {
-      sinon
-      .stub(UserModel, "findOne")
-      .resolves();
+    it('Email inexistente / incorreto no token', async () => {
+      vi.spyOn(userController.userService, 'getRole').mockResolvedValue({ type: undefined });
 
-      chaiHttpResponse = await chai
-      .request(app)
-      .get('/login/validate')
-      .set({Authorization: 'token'});
+      const response = await request(app)
+        .get('/login/validate')
+        .set({ Authorization: token });
 
-      expect(chaiHttpResponse.status).to.be.equal(401);
-      expect(chaiHttpResponse.body).to.deep.equal({ message: 'Token must be a valid token' })
+      expect(response.status).toBe(401);
+      expect(response.body).toEqual({ message: 'email incorreto' });
+
+      vi.restoreAllMocks();
     });
 
-    it('Token inexistente', async () => {
-      sinon
-      .stub(UserModel, "findOne")
-      .resolves();
+    it('Token inválido', async () => {
+      const response = await request(app)
+        .get('/login/validate')
+        .set({ Authorization: 'invalid_token' });
 
-      chaiHttpResponse = await chai
-      .request(app)
-      .get('/login/validate')
+      expect(response.status).toBe(401);
+      expect(response.body).toEqual({ message: 'Token must be a valid token' });
+    });
 
-      expect(chaiHttpResponse.status).to.be.equal(401);
-      expect(chaiHttpResponse.body).to.deep.equal({ message: 'Token inexistente' })
+    it('Token ausente / inexistente', async () => {
+      const response = await request(app)
+        .get('/login/validate');
+
+      expect(response.status).toBe(401);
+      expect(response.body).toEqual({ message: 'Token inexistente' });
     });
   });
 });

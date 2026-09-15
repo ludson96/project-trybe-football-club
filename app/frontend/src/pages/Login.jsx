@@ -47,7 +47,7 @@ const Login = () => {
         SecondNavegationLink={ MatchesBtn }
       />
       <section className="user-login-area">
-        <img src={ positiveLogo } alt="Trybe Futebol Clube Negative Logo" />
+        <img src={ positiveLogo } alt="Futebol Clube Logo" />
         <form>
           <h1>Área do usuário</h1>
           <label htmlFor="email-input">

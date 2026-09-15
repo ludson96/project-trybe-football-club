@@ -1,143 +1,137 @@
-import * as sinon from 'sinon';
-import * as chai from 'chai';
-// @ts-ignore
-import chaiHttp = require('chai-http');
-
-import { Response } from 'superagent';
+import { describe, it, expect, vi } from 'vitest';
+import request from 'supertest';
 import { app } from '../app';
-import MatcheModel from '../database/models/MatchesModel';
-import { allMatches, matcheInProgress, matcheNotInProgress, insertMatche, newMatche, token, insertTeamNonexistent, insertTeamRepetido } from './mocks/matche.mock';
+import { matchesController } from '../routers/matcheRouters';
+import {
+  allMatches,
+  matcheInProgress,
+  matcheNotInProgress,
+  insertMatche,
+  newMatche,
+  token,
+  insertTeamNonexistent,
+  insertTeamRepetido,
+} from './mocks/matche.mock';
 
-chai.use(chaiHttp);
+describe('Teste Matche (Vitest)', () => {
+  describe('GET /matches - Retorna partidas', () => {
+    it('com sucesso (todas as partidas)', async () => {
+      vi.spyOn(matchesController.matchesService, 'getMatches').mockResolvedValue(allMatches as any);
 
-const { expect } = chai;
-describe('Teste Matche', function() {
-  describe('Retorna todos as partidas', function() {
-    let chaiHttpResponse: Response;
+      const response = await request(app).get('/matches');
 
-    afterEach(sinon.restore)
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(allMatches);
 
-    it('com sucesso', async () => {
-      sinon
-      .stub(MatcheModel, 'findAll')
-      .resolves(allMatches as unknown as MatcheModel[]);
-
-      chaiHttpResponse = await chai
-      .request(app)
-      .get('/matches');
-
-      expect(chaiHttpResponse.status).to.be.equal(200);
-      expect(chaiHttpResponse.body).to.deep.equal(allMatches);
+      vi.restoreAllMocks();
     });
 
-    // https://www.chaijs.com/plugins/chai-http/
-    it('Retorna todas as partidas em progresso', async () => {
-      sinon
-      .stub(MatcheModel, 'findAll')
-      .resolves(matcheInProgress as unknown as MatcheModel[]);
+    it('retorna apenas partidas em progresso', async () => {
+      vi.spyOn(matchesController.matchesService, 'getMatches').mockResolvedValue(matcheInProgress as any);
 
-      chaiHttpResponse = await chai
-      .request(app)
-      .get('/matches')
-      .query({inProgress: 'true'}) // '/matches?inProgress=true;'
+      const response = await request(app)
+        .get('/matches')
+        .query({ inProgress: 'true' });
 
-      expect(chaiHttpResponse.status).to.be.equal(200);
-      expect(chaiHttpResponse.body).to.deep.equal(matcheInProgress);
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(matcheInProgress);
+
+      vi.restoreAllMocks();
     });
 
-    it('Retorna todas as partidas que não estão em progresso', async () => {
-      sinon
-      .stub(MatcheModel, 'findAll')
-      .resolves(matcheNotInProgress as unknown as MatcheModel[]);
+    it('retorna apenas partidas finalizadas', async () => {
+      vi.spyOn(matchesController.matchesService, 'getMatches').mockResolvedValue(matcheNotInProgress as any);
 
-      chaiHttpResponse = await chai
-      .request(app)
-      .get('/matches')
-      .query({inProgress: 'false'}) // '/matches?inProgress=true;'
+      const response = await request(app)
+        .get('/matches')
+        .query({ inProgress: 'false' });
 
-      expect(chaiHttpResponse.status).to.be.equal(200);
-      expect(chaiHttpResponse.body).to.deep.equal(matcheNotInProgress);
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(matcheNotInProgress);
+
+      vi.restoreAllMocks();
     });
   });
 
-  describe('Criar uma partida', function() {
-    let chaiHttpResponse: Response;
-
-    afterEach(sinon.restore);
-
+  describe('POST /matches - Criar uma partida', () => {
     it('com sucesso', async () => {
-      sinon
-      .stub(MatcheModel, "create")
-      .resolves(newMatche as MatcheModel);
+      vi.spyOn(matchesController.matchesService, 'createMatche').mockResolvedValue({
+        status: 201,
+        message: newMatche as any,
+      });
 
-      chaiHttpResponse = await chai
-      .request(app)
-      .post('/matches')
-      .send(insertMatche)
-      .set({Authorization: token});
+      const response = await request(app)
+        .post('/matches')
+        .send(insertMatche)
+        .set({ Authorization: token });
 
-      expect(chaiHttpResponse.status).to.be.equal(201);
-      expect(chaiHttpResponse.body).to.deep.equal(newMatche)
+      expect(response.status).toBe(201);
+      expect(response.body).toEqual(newMatche);
+
+      vi.restoreAllMocks();
     });
 
-    it('não é possível criar uma partida com um time inexistente', async () => {
-      chaiHttpResponse = await chai
-      .request(app)
-      .post('/matches')
-      .send(insertTeamNonexistent)
-      .set({Authorization: token});
+    it('não é possível criar uma partida com time inexistente', async () => {
+      vi.spyOn(matchesController.matchesService, 'createMatche').mockResolvedValue({
+        status: 404,
+        message: 'There is no team with such id!' as any,
+      });
 
-      expect(chaiHttpResponse.status).to.be.equal(404);
-      expect(chaiHttpResponse.body).to.deep.equal({ message: 'There is no team with such id!' });
+      const response = await request(app)
+        .post('/matches')
+        .send(insertTeamNonexistent)
+        .set({ Authorization: token });
+
+      expect(response.status).toBe(404);
+      expect(response.body).toEqual({ message: 'There is no team with such id!' });
+
+      vi.restoreAllMocks();
     });
 
-    it('não é possível criar uma partida com um time repetido', async () => {
-      chaiHttpResponse = await chai
-      .request(app)
-      .post('/matches')
-      .send(insertTeamRepetido)
-      .set({Authorization: token});
+    it('não é possível criar uma partida com dois times iguais', async () => {
+      vi.spyOn(matchesController.matchesService, 'createMatche').mockResolvedValue({
+        status: 422,
+        message: 'It is not possible to create a match with two equal teams' as any,
+      });
 
-      expect(chaiHttpResponse.status).to.be.equal(422);
-      expect(chaiHttpResponse.body).to.deep.equal({ message: 'It is not possible to create a match with two equal teams' });
+      const response = await request(app)
+        .post('/matches')
+        .send(insertTeamRepetido)
+        .set({ Authorization: token });
+
+      expect(response.status).toBe(422);
+      expect(response.body).toEqual({ message: 'It is not possible to create a match with two equal teams' });
+
+      vi.restoreAllMocks();
     });
   });
 
-  describe('Altera a partida em progresso para concluída', function() {
-    let chaiHttpResponse: Response;
-
-    afterEach(sinon.restore);
-
+  describe('PATCH /matches/:id/finish - Finaliza partida', () => {
     it('com sucesso', async () => {
-      sinon
-      .stub(MatcheModel, "update")
-      .resolves();
+      vi.spyOn(matchesController.matchesService, 'finish').mockResolvedValue(undefined);
 
-      chaiHttpResponse = await chai
-      .request(app)
-      .patch('/matches/1/finish');
+      const response = await request(app)
+        .patch('/matches/1/finish');
 
-      expect(chaiHttpResponse.status).to.be.equal(200);
-      expect(chaiHttpResponse.body).to.deep.equal({ message: "Finished" });
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({ message: 'Finished' });
+
+      vi.restoreAllMocks();
     });
   });
 
-  describe('Atualizar partida em andamento', function() {
-    let chaiHttpResponse: Response;
-
-    afterEach(sinon.restore);
-
+  describe('PATCH /matches/:id - Atualiza partida', () => {
     it('com sucesso', async () => {
-      sinon
-      .stub(MatcheModel, "update")
-      .resolves();
+      vi.spyOn(matchesController.matchesService, 'updateMatche').mockResolvedValue({} as any);
 
-      chaiHttpResponse = await chai
-      .request(app)
-      .patch('/matches/1');
+      const response = await request(app)
+        .patch('/matches/1')
+        .send({ homeTeamGoals: 3, awayTeamGoals: 1 });
 
-      expect(chaiHttpResponse.status).to.be.equal(200);
-      expect(chaiHttpResponse.body).to.deep.equal({ message: 'Partida atualizada com sucesso!!' });
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({ message: 'Partida atualizada com sucesso!!' });
+
+      vi.restoreAllMocks();
     });
   });
 });

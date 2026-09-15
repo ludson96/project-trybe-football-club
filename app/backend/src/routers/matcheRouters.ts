@@ -14,4 +14,5 @@ router.patch('/:id', matchesController.updateMatche);
 
 router.patch('/:id/finish', matchesController.finish);
 
+export { matchesController };
 export default router;

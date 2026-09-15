@@ -1,17 +1,17 @@
 import * as bcrypt from 'bcryptjs';
 import ILogin from '../interfaces/ILogin';
-import UsersModel from '../database/models/UserModel';
+import prisma from '../database/client';
 import JWT from '../auth/jwtFunctions';
 
 const jwt = new JWT();
 
 export default class UsersService {
-  constructor(public usersModel = UsersModel) {}
+  constructor(private _prisma = prisma) {}
 
   public async login(user: ILogin) {
     const { email, password } = user;
 
-    const newLogin = await this.usersModel.findOne({ where: { email } });
+    const newLogin = await this._prisma.user.findUnique({ where: { email } });
 
     if (!newLogin) {
       return undefined;
@@ -28,7 +28,7 @@ export default class UsersService {
   }
 
   public async getRole(email: string) {
-    const selectedUser = await this.usersModel.findOne({ where: { email } });
+    const selectedUser = await this._prisma.user.findUnique({ where: { email } });
 
     if (!selectedUser) {
       return { type: undefined };

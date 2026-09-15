@@ -1,4 +1,4 @@
-export const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImVtYWlsIjoidXNlckB1c2VyLmNvbSIsInBhc3N3b3JkIjoic2VjcmV0X3VzZXIifSwiaWF0IjoxNjc0NjczNzk1LCJleHAiOjE2NzUyNzg1OTV9.AkYhnWXCc_PcJMTZt-nenimK0x-vM7zGQCexlMoNug8";
+export const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImVtYWlsIjoidXNlckB1c2VyLmNvbSIsInBhc3N3b3JkIjoic2VjcmV0X3VzZXIifSwiaWF0IjoxNzg5NTA1MjQ5fQ.kzwmuLY274V_21egvYX-iL0sDfVO2bx9zcktIZlF0hg";
 
 export const validUser = {
    id: 2,

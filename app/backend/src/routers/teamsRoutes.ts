@@ -9,4 +9,5 @@ router.get('/', teamsController.getAllTeams);
 
 router.get('/:id', teamsController.getTeamById);
 
+export { teamsController };
 export default router;

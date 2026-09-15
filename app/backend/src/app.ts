@@ -1,11 +1,11 @@
-import * as express from 'express';
+import express, { RequestHandler, Express } from 'express';
 import userRouter from './routers/userRoutes';
 import teamsRouter from './routers/teamsRoutes';
 import matchesRouter from './routers/matcheRouters';
 import leaderboardRouter from './routers/leaderboardRouters';
 
 class App {
-  public app: express.Express;
+  public app: Express;
 
   constructor() {
     this.app = express();
@@ -25,7 +25,7 @@ class App {
   }
 
   private config():void {
-    const accessControl: express.RequestHandler = (_req, res, next) => {
+    const accessControl: RequestHandler = (_req, res, next) => {
       res.header('Access-Control-Allow-Origin', '*');
       res.header('Access-Control-Allow-Methods', 'GET,POST,DELETE,OPTIONS,PUT,PATCH');
       res.header('Access-Control-Allow-Headers', '*');

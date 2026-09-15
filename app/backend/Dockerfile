@@ -1,8 +1,8 @@
-FROM node:16.14-alpine
+FROM node:20-alpine
 WORKDIR /app-backend
 COPY package* ./
 RUN npm install
 COPY . ./
+RUN npm run build
 EXPOSE 3001
-ENTRYPOINT ["npm", "run"]
-CMD ["start"]
+CMD ["npm", "run", "start"]

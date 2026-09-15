@@ -1,33 +1,29 @@
-import MatchesModel from '../database/models/MatchesModel';
-import TeamModel from '../database/models/TeamsModel';
+import prisma from '../database/client';
 import IMatche, { IMatcheUpdated } from '../interfaces/IMatche';
 
 export default class MatchesService {
-  constructor(public matchesModel = MatchesModel) { }
+  constructor(private _prisma = prisma) { }
 
   public async getMatches(inProgress: string | undefined): Promise<object[]> {
     let where;
     if (inProgress) {
-      if (inProgress === 'true') {
-        where = { inProgress: true };
-      } else {
-        where = { inProgress: false };
-      }
+      where = { inProgress: inProgress === 'true' };
     }
 
-    const matches = await this.matchesModel.findAll({
+    const matches = await this._prisma.match.findMany({
       where,
-      include: [
-        { model: TeamModel, as: 'homeTeam', attributes: { exclude: ['id'] } },
-        { model: TeamModel, as: 'awayTeam', attributes: { exclude: ['id'] } },
-      ] });
+      include: {
+        homeTeam: { select: { teamName: true } },
+        awayTeam: { select: { teamName: true } },
+      },
+    });
 
     return matches;
   }
 
   public async verifyTeam(homeTeamId: number, awayTeamId: number) {
-    const homeTeam = await this.matchesModel.findByPk(homeTeamId);
-    const awayTeam = await this.matchesModel.findByPk(awayTeamId);
+    const homeTeam = await this._prisma.team.findUnique({ where: { id: homeTeamId } });
+    const awayTeam = await this._prisma.team.findUnique({ where: { id: awayTeamId } });
     if (homeTeam && awayTeam) return false;
     return true;
   }
@@ -39,21 +35,29 @@ export default class MatchesService {
     }
     const verify = await this.verifyTeam(homeTeamId, awayTeamId);
     if (verify) return { status: 404, message: 'There is no team with such id!' };
-    const newMatch = await
-    this.matchesModel.create({
-      homeTeamId,
-      awayTeamId,
-      homeTeamGoals,
-      awayTeamGoals,
-      inProgress: true,
+
+    const newMatch = await this._prisma.match.create({
+      data: {
+        homeTeamId,
+        awayTeamId,
+        homeTeamGoals,
+        awayTeamGoals,
+        inProgress: true,
+      },
     });
     return { status: 201, message: newMatch };
   }
 
   public async finish(id: number) {
-    await this.matchesModel.update({ inProgress: false }, { where: { id } });
+    await this._prisma.match.update({
+      where: { id },
+      data: { inProgress: false },
+    });
   }
 
   public updateMatche = async ({ homeTeamGoals, awayTeamGoals }: IMatcheUpdated, id: number) =>
-    this.matchesModel.update({ homeTeamGoals, awayTeamGoals }, { where: { id } });
+    this._prisma.match.update({
+      where: { id },
+      data: { homeTeamGoals, awayTeamGoals },
+    });
 }

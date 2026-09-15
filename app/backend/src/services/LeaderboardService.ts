@@ -1,48 +1,36 @@
-import MatcheModel from '../database/models/MatchesModel';
-// import TeamsService from './TeamsService';
-import TeamsModel from '../database/models/TeamsModel';
+import prisma from '../database/client';
 import { IPontos, IPartida, ITeam, ILeader } from '../interfaces/IMatche';
 
 export default class LeaderboardService {
-  constructor(
-    public teamsModel = TeamsModel,
-    public matcheModel = MatcheModel,
-  ) { }
+  constructor(private _prisma = prisma) { }
 
   public async getLeaderBoardLocal(local: 'home' | 'away') {
-    const allTeams = await this.teamsModel.findAll();
+    const allTeams = await this._prisma.team.findMany();
 
-    const allMatche = allTeams.map(async (team) => this.getTeamMatches(team, local));
+    const allMatche = allTeams.map(async (team: ITeam) => this.getTeamMatches(team, local));
 
-    const board = Promise.all(allMatche);
+    const board = await Promise.all(allMatche);
 
-    const result = LeaderboardService.rank(await board);
-
-    const rank = Promise.all(result);
-
-    return rank;
+    return LeaderboardService.rank(board);
   }
 
   public async getLeaderboard() {
-    const allTeams = await this.teamsModel.findAll();
+    const allTeams = await this._prisma.team.findMany();
 
-    const matchesHome = allTeams.map(async (t) => this.getTeamMatches(t, 'home'));
-    const matchesAway = allTeams.map(async (t) => this.getTeamMatches(t, 'away'));
+    const matchesHome = allTeams.map(async (t: ITeam) => this.getTeamMatches(t, 'home'));
+    const matchesAway = allTeams.map(async (t: ITeam) => this.getTeamMatches(t, 'away'));
 
-    const allMatchesHome = Promise.all(matchesHome);
-    const allMatchesAway = Promise.all(matchesAway);
+    const allMatchesHome = await Promise.all(matchesHome);
+    const allMatchesAway = await Promise.all(matchesAway);
 
-    const points = LeaderboardService.orgaPontos(await allMatchesHome, await allMatchesAway);
+    const points = LeaderboardService.orgaPontos(allMatchesHome, allMatchesAway);
 
-    const rank = Promise.all(LeaderboardService.rank(points));
-
-    return rank;
+    return LeaderboardService.rank(points);
   }
 
   private static orgaPontos(matcheHome: ILeader[], matcheAway: ILeader[]) {
     return matcheHome.map((h) => {
       const away = matcheAway.filter(({ name }) => name === h.name);
-      // if (!away) return home;
 
       const efficiency = LeaderboardService
         .eficiencia((h.totalPoints + away[0].totalPoints), (h.totalGames + away[0].totalGames));
@@ -67,24 +55,24 @@ export default class LeaderboardService {
   }
 
   private async getTeamMatches(team: ITeam, local: 'home' | 'away') {
-    const matches = await this.matcheModel.findAll({
-      where: { [`${local}TeamId`]: team.id, inProgress: false },
+    const where = local === 'home' ? { homeTeamId: team.id } : { awayTeamId: team.id };
+    const matches = await this._prisma.match.findMany({
+      where: { ...where, inProgress: false },
     });
+    return LeaderboardService.buildTeamStats(team.teamName, matches, local);
+  }
 
+  private static buildTeamStats(name: string, matches: IPartida[], local: 'home' | 'away') {
     const pontos = matches.map(LeaderboardService.calculatePoints);
-    const pontosTotais = LeaderboardService.pontosTotais(pontos, local);
+    const totalPoints = LeaderboardService.pontosTotais(pontos, local);
     const totalGames = matches.length;
-    const resultadoPartidas = LeaderboardService.resultadoPartidas(pontos, local);
-    const goals = LeaderboardService.statsGoals(matches, local);
-    const eficiencia = LeaderboardService.eficiencia(pontosTotais, totalGames);
-
     return {
-      name: team.teamName,
-      totalPoints: pontosTotais,
+      name,
+      totalPoints,
       totalGames,
-      ...resultadoPartidas,
-      ...goals,
-      efficiency: eficiencia,
+      ...LeaderboardService.resultadoPartidas(pontos, local),
+      ...LeaderboardService.statsGoals(matches, local),
+      efficiency: LeaderboardService.eficiencia(totalPoints, totalGames),
     };
   }
 
@@ -114,13 +102,13 @@ export default class LeaderboardService {
   private static statsGoals(matches: IPartida[], local: 'home' | 'away') {
     const oponente = local === 'home' ? 'away' : 'home';
 
-    const goalsFavor = matches
-      .map((match) => match[`${local}TeamGoals`])
-      .reduce((a, b) => a + b);
+    const goalsFavor = matches.length
+      ? matches.map((match) => match[`${local}TeamGoals`]).reduce((a, b) => a + b)
+      : 0;
 
-    const goalsOwn = matches
-      .map((match) => match[`${oponente}TeamGoals`])
-      .reduce((a, b) => a + b);
+    const goalsOwn = matches.length
+      ? matches.map((match) => match[`${oponente}TeamGoals`]).reduce((a, b) => a + b)
+      : 0;
 
     const goalsBalance = goalsFavor - goalsOwn;
 
@@ -128,15 +116,16 @@ export default class LeaderboardService {
   }
 
   private static eficiencia(pontosTotais: number, totalGames: number) {
+    if (totalGames === 0) return '0.00';
     return ((pontosTotais / (totalGames * 3)) * 100).toFixed(2);
   }
 
   private static rank(times: ILeader[]) {
     return times.sort((a, b) =>
-      b.totalVictories - a.totalVictories
-    || b.totalPoints - a.totalPoints
-    || b.goalsBalance - a.goalsBalance
-    || b.goalsFavor - a.goalsFavor
-    || a.goalsOwn - b.goalsOwn);
+      b.totalPoints - a.totalPoints
+      || b.totalVictories - a.totalVictories
+      || b.goalsBalance - a.goalsBalance
+      || b.goalsFavor - a.goalsFavor
+      || a.goalsOwn - b.goalsOwn);
   }
 }
