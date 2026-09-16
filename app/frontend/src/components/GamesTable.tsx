@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import { requestData } from '../services/requests';
 import Loading from './Loading';
 import { check, editIcon } from '../images';
+import { IMatch } from '../types';
 
-const GamesTable = ({ currentFilter, isAdm }) => {
-  const [games, setGames] = useState([]);
+interface GamesTableProps {
+  currentFilter: string;
+  isAdm: boolean;
+}
+
+const GamesTable: React.FC<GamesTableProps> = ({ currentFilter, isAdm }) => {
+  const [games, setGames] = useState<IMatch[]>([]);
 
   const navigate = useNavigate();
 
-  const getGames = (endpoint) => requestData(endpoint)
+  const getGames = (endpoint: string) => requestData<IMatch[]>(endpoint)
     .then((response) => setGames(response))
     .catch((error) => console.log(error));
 
@@ -58,7 +63,7 @@ const GamesTable = ({ currentFilter, isAdm }) => {
       <tbody>
         {
           games
-            .sort((a, b) => b.inProgress - a.inProgress)
+            .sort((a, b) => Number(b.inProgress) - Number(a.inProgress))
             .map(({
               id,
               homeTeam,
@@ -72,7 +77,7 @@ const GamesTable = ({ currentFilter, isAdm }) => {
                   className="games-table-tbody-home-team"
                   data-testid={ `matches__home_team_${id}` }
                 >
-                  { homeTeam.teamName }
+                  { homeTeam?.teamName }
                 </td>
                 <td
                   className="games-table-tbody-home-team-goals"
@@ -91,7 +96,7 @@ const GamesTable = ({ currentFilter, isAdm }) => {
                   className="games-table-tbody-away-team"
                   data-testid={ `matches__away_team_${id}` }
                 >
-                  { awayTeam.teamName }
+                  { awayTeam?.teamName }
                 </td>
                 <td className="games-table-tbody-empty-space">{ ' ' }</td>
                 <td className="games-table-tbody-status">
@@ -154,11 +159,6 @@ const GamesTable = ({ currentFilter, isAdm }) => {
       </tbody>
     </table>
   );
-};
-
-GamesTable.propTypes = {
-  currentFilter: PropTypes.string.isRequired,
-  isAdm: PropTypes.bool.isRequired,
 };
 
 export default GamesTable;

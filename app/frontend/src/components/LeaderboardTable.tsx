@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import { requestData } from '../services/requests';
 import Loading from './Loading';
-import { v4 as uuidv4 } from 'uuid';
+import { ILeaderboardTeam } from '../types';
 import '../styles/components/leaderboardTable.css';
 
-const LeaderboardTable = ({ currentFilter }) => {
-  const [leaderboard, setLeaderboard] = useState([]);
+interface LeaderboardTableProps {
+  currentFilter: string;
+  setCurrentFilter?: (filter: string) => void;
+}
 
-  const getLeaderboard = (endpoint) => requestData(endpoint)
+const LeaderboardTable: React.FC<LeaderboardTableProps> = ({ currentFilter }) => {
+  const [leaderboard, setLeaderboard] = useState<ILeaderboardTeam[]>([]);
+
+  const getLeaderboard = (endpoint: string) => requestData<ILeaderboardTeam[]>(endpoint)
     .then((response) => setLeaderboard(response))
     .catch((error) => console.log(error));
 
@@ -74,7 +78,7 @@ const LeaderboardTable = ({ currentFilter }) => {
               efficiency,
             },
             index) => (
-              <tr key={ uuidv4() }>
+              <tr key={ name }>
                 <td
                   className="score-board-classification"
                   data-testid={ `score_boarding__classification_${index + 1}` }
@@ -150,7 +154,4 @@ const LeaderboardTable = ({ currentFilter }) => {
   );
 };
 
-LeaderboardTable.propTypes = {
-  currentFilter: PropTypes.string.isRequired,
-};
 export default LeaderboardTable;

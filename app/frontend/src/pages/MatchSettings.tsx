@@ -6,15 +6,25 @@ import Header from '../components/Header';
 import MatchesBtn from '../components/MatchesBtn';
 import Loading from '../components/Loading';
 import api, { requestData, setToken } from '../services/requests';
+import { ITeam, IMatch } from '../types';
 import '../styles/pages/matchSettings.css';
 
-const MatchSettings = () => {
-  const [teams, setTeams] = useState([]);
-  const [homeTeamScoreboard, setHomeTeamScoreboard] = useState('0');
-  const [awayTeamScoreboard, setAwayTeamScoreboard] = useState('0');
-  const [homeTeamId, setHomeTeamId] = useState(0);
-  const [awayTeamId, setAwayTeamId] = useState(0);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+interface LocationStateMatch {
+  id: number;
+  homeTeam: ITeam;
+  homeTeamGoals: number | string;
+  awayTeam: ITeam;
+  awayTeamGoals: number | string;
+  inProgress: boolean;
+}
+
+const MatchSettings: React.FC = () => {
+  const [teams, setTeams] = useState<ITeam[]>([]);
+  const [homeTeamScoreboard, setHomeTeamScoreboard] = useState<string | number>('0');
+  const [awayTeamScoreboard, setAwayTeamScoreboard] = useState<string | number>('0');
+  const [homeTeamId, setHomeTeamId] = useState<number>(0);
+  const [awayTeamId, setAwayTeamId] = useState<number>(0);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -41,47 +51,57 @@ const MatchSettings = () => {
       setToken(token);
     }
     if (!teams.length) {
-      requestData(endpoint)
+      requestData<ITeam[]>(endpoint)
         .then((response) => {
           setTeams(response);
         })
         .catch((error) => console.log(error));
     }
-  });
+  }, [teams.length]);
 
-  const getTeam = (team, homeOrAway) => {
-    const { id } = teams.find(({ teamName }) => teamName === team);
-    if (homeOrAway === 'homeTeam') { setHomeTeamId(id); } else { setAwayTeamId(id); }
+  const getTeam = (team: string, homeOrAway: 'homeTeam' | 'awayTeam') => {
+    const foundTeam = teams.find(({ teamName }) => teamName === team);
+    if (foundTeam) {
+      if (homeOrAway === 'homeTeam') {
+        setHomeTeamId(foundTeam.id);
+      } else {
+        setAwayTeamId(foundTeam.id);
+      }
+    }
   };
 
   const createMatch = async () => {
     const body = {
       homeTeamId,
       awayTeamId,
-      homeTeamGoals: +homeTeamScoreboard,
-      awayTeamGoals: +awayTeamScoreboard,
+      homeTeamGoals: Number(homeTeamScoreboard),
+      awayTeamGoals: Number(awayTeamScoreboard),
     };
 
-    const { data } = await api.post('/matches', body);
+    const { data } = await api.post<IMatch>('/matches', body);
     return data;
   };
 
-  const updateMatch = async (id, updateGoals) => {
+  const updateMatch = async (id: number, updateGoals: { homeTeamGoals: number | string; awayTeamGoals: number | string }) => {
     await api.patch(`/matches/${id}`, { ...updateGoals });
   };
-  const finishMatch = async (id) => {
+
+  const finishMatch = async (id: number) => {
     await api.patch(`/matches/${id}/finish`);
   };
 
   if (!isAuthenticated) return <Loading />;
 
-  if (location.state) {
-    const { id,
+  const locationState = location.state as LocationStateMatch | null;
+
+  if (locationState) {
+    const {
+      id,
       homeTeam: homeTeamState,
       homeTeamGoals,
       awayTeam: awayTeamState,
       awayTeamGoals,
-    } = location.state;
+    } = locationState;
     return (
       <>
         <Header
@@ -115,6 +135,8 @@ const MatchSettings = () => {
       <CreateNewGame
         setHomeTeamScoreboard={ setHomeTeamScoreboard }
         setAwayTeamScoreboard={ setAwayTeamScoreboard }
+        homeTeamScoreboard={ String(homeTeamScoreboard) }
+        awayTeamScoreboard={ String(awayTeamScoreboard) }
         teams={ teams }
         getTeam={ getTeam }
         createMatch={ createMatch }

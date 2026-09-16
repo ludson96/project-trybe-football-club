@@ -4,19 +4,19 @@ import Header from '../components/Header';
 import AddNewMatchBtn from '../components/AddNewMatchBtn';
 import LeaderboardBtn from '../components/LeaderboardBtn';
 import LoginBtn from '../components/LoginBtn';
-import GamerFilter from '../components/GameFilter';
+import GameFilter from '../components/GameFilter';
 import '../styles/pages/games.css';
 
-const Games = () => {
+const Games: React.FC = () => {
   const [currentFilter, setCurrentFilter] = useState('Status do Jogo');
   const [isAdm, setIsAdm] = useState(false);
   const [logged, setLogin] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('token') || false;
-    const role = localStorage.getItem('role') || false;
+    const token = localStorage.getItem('token');
+    const role = localStorage.getItem('role');
     if (token) setLogin(true);
-    
+
     setIsAdm(role === 'admin');
   }, []);
 
@@ -31,7 +31,7 @@ const Games = () => {
       />
       <section className="games-section">
         <div className="games-handlers">
-          <GamerFilter
+          <GameFilter
             currentFilter={ currentFilter }
             setCurrentFilter={ setCurrentFilter }
           />

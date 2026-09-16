@@ -6,14 +6,14 @@ import MatchesBtn from '../components/MatchesBtn';
 import TableFilter from '../components/TableFilter';
 import '../styles/pages/leaderboard.css';
 
-const Leaderboard = () => {
+const Leaderboard: React.FC = () => {
   const [logged, setLogin] = useState(false);
   const [currentFilter, setCurrentFilter] = useState('Classificação Geral');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     setLogin(!!token);
-  }, [logged, setLogin]);
+  }, [logged]);
 
   return (
     <>

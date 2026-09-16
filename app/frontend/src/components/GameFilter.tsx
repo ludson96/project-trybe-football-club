@@ -1,10 +1,16 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 
-const GamerFilter = ({ currentFilter, setCurrentFilter }) => {
+interface GameFilterProps {
+  currentFilter: string;
+  setCurrentFilter: (filter: string) => void;
+}
+
+const GameFilter: React.FC<GameFilterProps> = ({ currentFilter, setCurrentFilter }) => {
   const handleCurrentFilter = () => {
-    const selectedFilter = document.getElementById('game-filter').value;
-    setCurrentFilter(selectedFilter);
+    const selectElement = document.getElementById('game-filter') as HTMLSelectElement | null;
+    if (selectElement) {
+      setCurrentFilter(selectElement.value);
+    }
   };
 
   return (
@@ -32,9 +38,4 @@ const GamerFilter = ({ currentFilter, setCurrentFilter }) => {
   );
 };
 
-GamerFilter.propTypes = ({
-  currentFilter: PropTypes.string,
-  setCurrentFilter: PropTypes.func,
-}).isRequired;
-
-export default GamerFilter;
+export default GameFilter;

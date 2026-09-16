@@ -5,26 +5,27 @@ import LeaderboardBtn from '../components/LeaderboardBtn';
 import MatchesBtn from '../components/MatchesBtn';
 import { requestLogin, setToken, requestData } from '../services/requests';
 import { positiveLogo } from '../images';
+import { ILoginResponse, IUserRoleResponse } from '../types';
 import '../styles/pages/login.css';
 
-const Login = () => {
+const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLogged, setIsLogged] = useState(false);
   const [failedTryLogin, setFailedTryLogin] = useState(false);
 
-  const login = async (event) => {
+  const login = async (event: React.MouseEvent<HTMLButtonElement> | React.FormEvent) => {
     event.preventDefault();
 
     try {
-      const { token } = await requestLogin('/login', { email, password });
+      const { token } = await requestLogin<ILoginResponse>('/login', { email, password });
 
       setToken(token);
 
-      const { role } = await requestData('/login/validate', { email, password });
+      const { role } = await requestData<IUserRoleResponse>('/login/validate');
 
-      localStorage.setItem('token',  token);
-      localStorage.setItem('role',  role);
+      localStorage.setItem('token', token);
+      localStorage.setItem('role', role);
 
       setIsLogged(true);
     } catch (error) {

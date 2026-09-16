@@ -1,7 +1,15 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import { ITeam } from '../types';
 
-const TeamOption = ({ teams, homeTeam, getTeam, testId }) => (
+interface TeamOptionProps {
+  teams: ITeam[];
+  homeTeam: boolean;
+  getTeam: (teamName: string, homeOrAway: 'homeTeam' | 'awayTeam') => void;
+  testId: string;
+  setTeams?: React.Dispatch<React.SetStateAction<ITeam[]>>;
+}
+
+const TeamOption: React.FC<TeamOptionProps> = ({ teams, homeTeam, getTeam, testId }) => (
   <label htmlFor={ (homeTeam) ? 'home-team-scoreboard' : 'away-team-scoreboard' }>
     { (homeTeam) ? <p>Time Mandante</p> : <p>Time Visitante</p> }
     <select
@@ -19,12 +27,5 @@ const TeamOption = ({ teams, homeTeam, getTeam, testId }) => (
     </select>
   </label>
 );
-
-TeamOption.propTypes = {
-  teams: PropTypes.arrayOf(PropTypes.object).isRequired,
-  homeTeam: PropTypes.bool.isRequired,
-  getTeam: PropTypes.func.isRequired,
-  testId: PropTypes.string.isRequired,
-};
 
 export default TeamOption;

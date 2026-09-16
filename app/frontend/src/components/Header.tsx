@@ -1,10 +1,17 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import { negativeLogo, exitToAppImg } from '../images';
 import '../styles/components/header.css';
 
-const Header = ({
+interface HeaderProps {
+  page: string;
+  FirstNavigationLink: React.ComponentType;
+  SecondNavegationLink?: React.ComponentType;
+  logged?: boolean;
+  setLogin?: (logged: boolean) => void;
+}
+
+const Header: React.FC<HeaderProps> = ({
   page,
   FirstNavigationLink,
   SecondNavegationLink,
@@ -16,7 +23,7 @@ const Header = ({
   const logoff = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
-    setLogin(false);
+    if (setLogin) setLogin(false);
     navigate('/leaderboard');
   };
 
@@ -36,25 +43,11 @@ const Header = ({
                 <img src={ exitToAppImg } alt="Sair do aplicativo" />
               </button>
             )
-            : <SecondNavegationLink />
+            : SecondNavegationLink && <SecondNavegationLink />
         }
       </div>
     </header>
   );
-};
-
-Header.propTypes = {
-  page: PropTypes.string.isRequired,
-  FirstNavigationLink: PropTypes.elementType.isRequired,
-  SecondNavegationLink: PropTypes.elementType,
-  logged: PropTypes.bool,
-  setLogin: PropTypes.func,
-};
-
-Header.defaultProps = {
-  SecondNavegationLink: null,
-  logged: undefined,
-  setLogin: undefined,
 };
 
 export default Header;

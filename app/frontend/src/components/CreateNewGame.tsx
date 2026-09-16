@@ -1,23 +1,34 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
-
 import TeamOption from './TeamOption';
 import Scoreboard from './Scoreboard';
+import { ITeam } from '../types';
 
-const CreateNewGame = ({
+interface CreateNewGameProps {
+  teams: ITeam[];
+  setTeams?: React.Dispatch<React.SetStateAction<ITeam[]>>;
+  getTeam: (teamName: string, homeOrAway: 'homeTeam' | 'awayTeam') => void;
+  homeTeamScoreboard?: string;
+  setHomeTeamScoreboard: (score: string | number) => void;
+  awayTeamScoreboard?: string;
+  setAwayTeamScoreboard: (score: string | number) => void;
+  createMatch: () => Promise<any>;
+  finishMatch: (id: number) => Promise<void>;
+}
+
+const CreateNewGame: React.FC<CreateNewGameProps> = ({
   teams,
   setTeams,
   getTeam,
-  homeTeamScoreboard,
+  homeTeamScoreboard = '0',
   setHomeTeamScoreboard,
-  awayTeamScoreboard,
+  awayTeamScoreboard = '0',
   setAwayTeamScoreboard,
   createMatch,
   finishMatch,
 }) => {
   const notCreated = 'not-created';
   const [inProgress, setInProgress] = useState(notCreated);
-  const [createdMatch, setCreatedMatch] = useState(notCreated);
+  const [createdMatch, setCreatedMatch] = useState<any>(notCreated);
 
   return (
     <section className="match-settings-section">
@@ -66,7 +77,6 @@ const CreateNewGame = ({
             disabled={ (inProgress !== notCreated) }
           >
             Salvar Partida
-
           </button>
           <button
             data-testid="insertion_matches__finish_match_btn"
@@ -75,22 +85,11 @@ const CreateNewGame = ({
             disabled={ (inProgress === notCreated) }
           >
             Finalizar Partida
-
           </button>
         </div>
       </form>
     </section>
   );
 };
-
-CreateNewGame.propTypes = ({
-  teams: PropTypes.arrayOf(PropTypes.object),
-  setTeams: PropTypes.func,
-  getTeam: PropTypes.func,
-  homeTeamScoreboard: PropTypes.string,
-  setHomeTeamScoreboard: PropTypes.func,
-  awayTeamScoreboard: PropTypes.string,
-  setAwayTeamScoreboard: PropTypes.func,
-}).isRequired;
 
 export default CreateNewGame;

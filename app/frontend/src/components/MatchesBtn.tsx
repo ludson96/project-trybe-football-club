@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const MatchesBtn = () => (
+const MatchesBtn: React.FC = () => (
   <Link data-testid="header__show_matches_btn" to="/matches">
     Partidas
   </Link>
