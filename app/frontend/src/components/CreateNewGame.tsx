@@ -13,6 +13,8 @@ interface CreateNewGameProps {
   setAwayTeamScoreboard: (score: string | number) => void;
   createMatch: () => Promise<any>;
   finishMatch: (id: number) => Promise<void>;
+  homeTeamId?: number;
+  awayTeamId?: number;
 }
 
 const CreateNewGame: React.FC<CreateNewGameProps> = ({
@@ -25,10 +27,15 @@ const CreateNewGame: React.FC<CreateNewGameProps> = ({
   setAwayTeamScoreboard,
   createMatch,
   finishMatch,
+  homeTeamId,
+  awayTeamId,
 }) => {
   const notCreated = 'not-created';
   const [inProgress, setInProgress] = useState(notCreated);
   const [createdMatch, setCreatedMatch] = useState<any>(notCreated);
+
+  const homeTeamName = teams.find((t) => t.id === homeTeamId)?.teamName;
+  const awayTeamName = teams.find((t) => t.id === awayTeamId)?.teamName;
 
   return (
     <section className="match-settings-section">
@@ -40,6 +47,7 @@ const CreateNewGame: React.FC<CreateNewGameProps> = ({
             setTeams={ setTeams }
             homeTeam
             getTeam={ getTeam }
+            selectedTeam={ homeTeamName }
           />
           <Scoreboard
             testId="insertion_matches__select_quantity_goals_home_team"
@@ -63,6 +71,7 @@ const CreateNewGame: React.FC<CreateNewGameProps> = ({
             setTeams={ setTeams }
             homeTeam={ false }
             getTeam={ getTeam }
+            selectedTeam={ awayTeamName }
           />
         </div>
         <div className="match-settings-form-buttons">

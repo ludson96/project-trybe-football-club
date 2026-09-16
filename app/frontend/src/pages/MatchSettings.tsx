@@ -54,6 +54,10 @@ const MatchSettings: React.FC = () => {
       requestData<ITeam[]>(endpoint)
         .then((response) => {
           setTeams(response);
+          if (response && response.length >= 2) {
+            setHomeTeamId(response[0].id);
+            setAwayTeamId(response[1].id);
+          }
         })
         .catch((error) => console.log(error));
     }
@@ -208,6 +212,8 @@ const MatchSettings: React.FC = () => {
         getTeam={ getTeam }
         createMatch={ createMatch }
         finishMatch={ finishMatch }
+        homeTeamId={ homeTeamId }
+        awayTeamId={ awayTeamId }
       />
     </>
   );
