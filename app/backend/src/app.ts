@@ -1,4 +1,5 @@
-import express, { RequestHandler, Express } from 'express';
+import express, { Express } from 'express';
+import cors from 'cors';
 import userRouter from './routers/userRoutes';
 import teamsRouter from './routers/teamsRoutes';
 import matchesRouter from './routers/matcheRouters';
@@ -25,15 +26,8 @@ class App {
   }
 
   private config():void {
-    const accessControl: RequestHandler = (_req, res, next) => {
-      res.header('Access-Control-Allow-Origin', '*');
-      res.header('Access-Control-Allow-Methods', 'GET,POST,DELETE,OPTIONS,PUT,PATCH');
-      res.header('Access-Control-Allow-Headers', '*');
-      next();
-    };
-
+    this.app.use(cors());
     this.app.use(express.json());
-    this.app.use(accessControl);
   }
 
   public start(PORT: string | number):void {
