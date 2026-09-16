@@ -70,46 +70,94 @@ const MatchSettings: React.FC = () => {
     }
   };
 
-  const createMatch = async () => {
-    const body = {
-      homeTeamId,
-      awayTeamId,
-      homeTeamGoals: Number(homeTeamScoreboard),
-      awayTeamGoals: Number(awayTeamScoreboard),
-    };
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [loadingMessage, setLoadingMessage] = useState<string>('Processando...');
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
-    const { data } = await api.post<IMatch>('/matches', body);
-    return data;
+  const showToastAndRedirect = (message: string, type: 'success' | 'error') => {
+    setToast({ message, type });
+    setTimeout(() => {
+      navigate('/matches');
+    }, 1800);
+  };
+
+  const createMatch = async () => {
+    setIsLoading(true);
+    setLoadingMessage('Criando nova partida...');
+    try {
+      const body = {
+        homeTeamId,
+        awayTeamId,
+        homeTeamGoals: Number(homeTeamScoreboard),
+        awayTeamGoals: Number(awayTeamScoreboard),
+      };
+
+      const { data } = await api.post<IMatch>('/matches', body);
+      setIsLoading(false);
+      showToastAndRedirect('Partida criada com sucesso!', 'success');
+      return data;
+    } catch (error) {
+      setIsLoading(false);
+      console.error(error);
+      setToast({ message: 'Erro ao criar partida.', type: 'error' });
+      setTimeout(() => setToast(null), 3000);
+      throw error;
+    }
   };
 
   const updateMatch = async (id: number, updateGoals: { homeTeamGoals: number | string; awayTeamGoals: number | string }) => {
+    setIsLoading(true);
+    setLoadingMessage('Atualizando placar...');
     try {
       await api.patch(`/matches/${id}`, {
         homeTeamGoals: Number(updateGoals.homeTeamGoals),
         awayTeamGoals: Number(updateGoals.awayTeamGoals),
       });
-      alert('Partida editada com sucesso!');
-      navigate('/matches');
+      setIsLoading(false);
+      showToastAndRedirect('Partida editada com sucesso!', 'success');
     } catch (error) {
+      setIsLoading(false);
       console.error(error);
-      alert('Erro ao atualizar a partida.');
+      setToast({ message: 'Erro ao atualizar a partida.', type: 'error' });
+      setTimeout(() => setToast(null), 3000);
     }
   };
 
   const finishMatch = async (id: number) => {
+    setIsLoading(true);
+    setLoadingMessage('Finalizando partida...');
     try {
       await api.patch(`/matches/${id}/finish`);
-      alert('Partida finalizada com sucesso!');
-      navigate('/matches');
+      setIsLoading(false);
+      showToastAndRedirect('Partida finalizada com sucesso!', 'success');
     } catch (error) {
+      setIsLoading(false);
       console.error(error);
-      alert('Erro ao finalizar a partida.');
+      setToast({ message: 'Erro ao finalizar a partida.', type: 'error' });
+      setTimeout(() => setToast(null), 3000);
     }
   };
 
   if (!isAuthenticated) return <Loading />;
 
   const locationState = location.state as LocationStateMatch | null;
+
+  const renderFeedbackElements = () => (
+    <>
+      {isLoading && (
+        <div className="loading-overlay">
+          <div className="circular-spinner" />
+          <p className="loading-text">{loadingMessage}</p>
+        </div>
+      )}
+      {toast && (
+        <div className={`floating-toast ${toast.type}`}>
+          <span className="toast-icon">{toast.type === 'success' ? '✓' : '✕'}</span>
+          <span>{toast.message}</span>
+        </div>
+      )}
+    </>
+  );
 
   if (locationState) {
     const {
@@ -121,6 +169,7 @@ const MatchSettings: React.FC = () => {
     } = locationState;
     return (
       <>
+        {renderFeedbackElements()}
         <Header
           page="EDITAR PARTIDA"
           FirstNavigationLink={ MatchesBtn }
@@ -143,6 +192,7 @@ const MatchSettings: React.FC = () => {
 
   return (
     <>
+      {renderFeedbackElements()}
       <Header
         page="ADICIONAR PARTIDA"
         FirstNavigationLink={ MatchesBtn }
