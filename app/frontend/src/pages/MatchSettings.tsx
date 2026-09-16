@@ -83,14 +83,28 @@ const MatchSettings: React.FC = () => {
   };
 
   const updateMatch = async (id: number, updateGoals: { homeTeamGoals: number | string; awayTeamGoals: number | string }) => {
-    await api.patch(`/matches/${id}`, {
-      homeTeamGoals: Number(updateGoals.homeTeamGoals),
-      awayTeamGoals: Number(updateGoals.awayTeamGoals),
-    });
+    try {
+      await api.patch(`/matches/${id}`, {
+        homeTeamGoals: Number(updateGoals.homeTeamGoals),
+        awayTeamGoals: Number(updateGoals.awayTeamGoals),
+      });
+      alert('Partida editada com sucesso!');
+      navigate('/matches');
+    } catch (error) {
+      console.error(error);
+      alert('Erro ao atualizar a partida.');
+    }
   };
 
   const finishMatch = async (id: number) => {
-    await api.patch(`/matches/${id}/finish`);
+    try {
+      await api.patch(`/matches/${id}/finish`);
+      alert('Partida finalizada com sucesso!');
+      navigate('/matches');
+    } catch (error) {
+      console.error(error);
+      alert('Erro ao finalizar a partida.');
+    }
   };
 
   if (!isAuthenticated) return <Loading />;
