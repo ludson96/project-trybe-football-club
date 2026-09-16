@@ -58,6 +58,9 @@ export default class MatchesService {
   public updateMatche = async ({ homeTeamGoals, awayTeamGoals }: IMatcheUpdated, id: number) =>
     this._prisma.match.update({
       where: { id },
-      data: { homeTeamGoals, awayTeamGoals },
+      data: {
+        homeTeamGoals: Number(homeTeamGoals),
+        awayTeamGoals: Number(awayTeamGoals),
+      },
     });
 }

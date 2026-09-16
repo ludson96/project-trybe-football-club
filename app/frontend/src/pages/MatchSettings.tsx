@@ -83,7 +83,10 @@ const MatchSettings: React.FC = () => {
   };
 
   const updateMatch = async (id: number, updateGoals: { homeTeamGoals: number | string; awayTeamGoals: number | string }) => {
-    await api.patch(`/matches/${id}`, { ...updateGoals });
+    await api.patch(`/matches/${id}`, {
+      homeTeamGoals: Number(updateGoals.homeTeamGoals),
+      awayTeamGoals: Number(updateGoals.awayTeamGoals),
+    });
   };
 
   const finishMatch = async (id: number) => {
