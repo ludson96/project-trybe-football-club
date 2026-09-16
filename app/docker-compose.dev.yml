@@ -27,12 +27,12 @@ services:
       - APP_PORT=3001
       - JWT_SECRET=jwt_secret
       - DATABASE_PROVIDER=mysql
-      - DATABASE_URL=mysql://root:123456@db:3306/TRYBE_FUTEBOL_CLUBE
+      - DATABASE_URL=mysql://root:123456@db:3306/FUTEBOL_CLUBE_DB
       - DB_USER=root
       - DB_PASS=123456
       - DB_HOST=db
       - DB_PORT=3306
-      - DB_NAME=TRYBE_FUTEBOL_CLUBE
+      - DB_NAME=FUTEBOL_CLUBE_DB
     command: npm run dev
 
   db:
@@ -43,7 +43,7 @@ services:
       - 3002:3306
     environment:
       - MYSQL_ROOT_PASSWORD=123456
-      - MYSQL_DATABASE=TRYBE_FUTEBOL_CLUBE
+      - MYSQL_DATABASE=FUTEBOL_CLUBE_DB
     restart: 'always'
     volumes:
       - db-data-dev:/var/lib/mysql

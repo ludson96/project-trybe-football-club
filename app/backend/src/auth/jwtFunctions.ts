@@ -17,9 +17,4 @@ export default class JWT {
     const token = jwt.sign({ data: payload }, this._secret, this._jwtConfig);
     return token;
   }
-
-  // public verifyToken(authorization: string) {
-  //   const payload = jwt.verify(authorization, this._secret);
-  //   return payload;
-  // }
 }

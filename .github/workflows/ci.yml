@@ -37,6 +37,9 @@ jobs:
       - name: TypeScript Check
         run: npx tsc --noEmit
 
+      - name: Lint Code
+        run: npm run lint
+
       - name: Run Vitest Suite
         run: |
           export DATABASE_PROVIDER=sqlite

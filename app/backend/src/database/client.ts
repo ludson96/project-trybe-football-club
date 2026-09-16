@@ -10,7 +10,7 @@ const getDatabaseUrl = () => {
   const dbPass = process.env.DB_PASS || '123456';
   const dbHost = process.env.DB_HOST || 'localhost';
   const dbPort = process.env.DB_PORT || '3002';
-  const dbName = process.env.DB_NAME || 'TRYBE_FUTEBOL_CLUBE';
+  const dbName = process.env.DB_NAME || 'FUTEBOL_CLUBE_DB';
 
   if (process.env.DATABASE_PROVIDER === 'sqlite') {
     return 'file:./dev.db';
