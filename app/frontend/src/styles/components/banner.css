@@ -1,0 +1,105 @@
+.server-notice-banner {
+  position: relative;
+  z-index: 50;
+  width: 100%;
+  box-sizing: border-box;
+  background: linear-gradient(90deg, #fffbeb 0%, rgba(254, 243, 199, 0.8) 50%, rgba(253, 230, 138, 0.6) 100%);
+  border-bottom: 1px solid rgba(251, 191, 36, 0.4);
+  padding: 10px 16px;
+  color: #78350f;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.server-notice-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.server-notice-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.server-notice-pulse {
+  position: relative;
+  display: flex;
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+}
+
+.server-notice-ping {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: #fbbf24;
+  opacity: 0.75;
+  animation: bannerPing 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.server-notice-dot {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #f59e0b;
+}
+
+.server-notice-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: #b45309;
+}
+
+.server-notice-text {
+  margin: 0;
+  color: #78350f;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.server-notice-text strong {
+  color: #451a03;
+  font-weight: 600;
+}
+
+.server-notice-close-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #92400e;
+  border-radius: 4px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.server-notice-close-btn:hover {
+  background-color: rgba(251, 191, 36, 0.35);
+  color: #451a03;
+}
+
+.server-notice-close-icon {
+  width: 16px;
+  height: 16px;
+}
+
+@keyframes bannerPing {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}

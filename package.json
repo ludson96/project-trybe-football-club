@@ -15,5 +15,8 @@
     "logs": "cd app && docker compose logs -f"
   },
   "author": "Ludson",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "lucide-react": "^1.48.0"
+  }
 }
