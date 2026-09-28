@@ -1,6 +1,7 @@
 .server-notice-banner {
-  position: relative;
+  position: fixed;
   z-index: 50;
+  top: 0px;
   width: 100%;
   box-sizing: border-box;
   background: linear-gradient(90deg, #fffbeb 0%, rgba(254, 243, 199, 0.8) 50%, rgba(253, 230, 138, 0.6) 100%);
