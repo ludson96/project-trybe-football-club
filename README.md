@@ -12,7 +12,6 @@
 [![Vitest](https://img.shields.io/badge/Vitest-1.6.1-6E9F18.svg?style=for-the-badge&logo=vitest)](https://vitest.dev/)
 [![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED.svg?style=for-the-badge&logo=docker)](https://www.docker.com/)
 [![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub_Actions-2088FF.svg?style=for-the-badge&logo=github-actions)](https://github.com/features/actions)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
 </div>
 
@@ -32,7 +31,6 @@ Plataforma Web Full Stack completa e moderna para gerenciamento de campeonatos d
 - [📁 Estrutura do Repositório](#-estrutura-do-repositório)
 - [💡 Decisões Técnicas](#-decisões-técnicas)
 - [🚀 Como Executar o Projeto](#-como-executar-o-projeto)
-- [📄 Licença](#-licença)
 
 ## 📝 Sobre o Projeto
 
@@ -259,10 +257,6 @@ cd ../frontend && npm run typecheck
 # Análise de linting (Back-end)
 cd ../backend && npm run lint
 ```
-
-## 📄 Licença
-
-Este projeto está licenciado sob os termos da licença **MIT**. Consulte o arquivo `LICENSE` para mais detalhes.
 
 <div align="center">
   Desenvolvido por <strong>Ludson Pereira dos Santos</strong> 🚀<br />
